@@ -40,7 +40,7 @@ class NetDatabase:
         # Таблица сообщений
         cursor.execute('''
                     CREATE TABLE IF NOT EXISTS messages (
-                        global_id       INTEGER PRIMARY KEY,
+                        id              INTEGER PRIMARY KEY AUTOINCREMENT,
                         sender_id       INTEGER NOT NULL,
                         msg_id          INTEGER NOT NULL,
                         cor_id          INTEGER,
@@ -69,12 +69,11 @@ class NetDatabase:
         json_data = json.dumps(message.json_data) if message.json_data else None
 
         cursor.execute('''
-            INSERT OR REPLACE INTO messages 
-            (global_id, sender_id, msg_id, cor_id, dest_id, is_request, 
+            INSERT INTO messages
+            (sender_id, msg_id, cor_id, dest_id, is_request, 
              bools, json_data, text, image_num, fragment_id, image_id, received_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            message.global_id,
             message.sender_id,
             message.msg_id,
             message.cor_id,

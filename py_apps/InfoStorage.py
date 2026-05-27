@@ -13,7 +13,6 @@ import threading
 
 @dataclass
 class Message:
-    global_id: int
     sender_id: int
     msg_id: int
     cor_id: int
@@ -41,15 +40,12 @@ class InfoStorage:
         self.info_lock = threading.Lock()
 
     def init_db(self, db_name="netnode.db"):
-        self.db = NetDatabase("netnode.db")
+        self.db = NetDatabase(db_name)
         self.save_db = True
 
 
     def save_message(self, parsed_message_dict, save_db=False):
-        global_id = parsed_message_dict["sender_id"] << 32 + parsed_message_dict["msg_id"]
-
         mes = Message(
-            global_id,
             parsed_message_dict["sender_id"],
             parsed_message_dict["msg_id"],
             parsed_message_dict["cor_id"],
@@ -100,7 +96,7 @@ class InfoStorage:
                 print(f"Ошибка сохранения сообщения в БД: {e}")
 
         with self.info_lock:
-            self.info_dict[global_id] = mes
+            self.info_dict[(mes.sender_id, mes.msg_id)] = mes
 
     def get_image(self, sender_id, image_num):
         with self.lock:

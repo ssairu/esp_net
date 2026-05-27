@@ -4,7 +4,7 @@ from py_apps.NetNode import NetNode
 
 folder_path = "/home/user/code/esp_net/examples"
 n = NetNode(1)
-n.start_conn("/dev/ttyUSB1")
+n.start_conn("/dev/ttyUSB0")
 n.start_listen()
 n.start_interactive()
 

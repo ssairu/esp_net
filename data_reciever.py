@@ -32,14 +32,14 @@ n.add_commands["request_image"] = request_image
 n.add_commands["request_info"] = request_info
 n.add_commands["print_attention"] = print_attention
 
-n.start_conn("/dev/ttyUSB0")
+n.start_conn("/dev/ttyUSB1")
+n.listener.storage.init_db()
 
 attention_messages = []
 n.add_params["attention_messages"] = attention_messages
 n.start_listen()
 
 n.start_interactive()
-
 index = -1
 while True:
     time.sleep(1)

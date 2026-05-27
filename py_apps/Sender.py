@@ -31,8 +31,8 @@ class Image:
 
     def tobytesFrags(self, dest_id=0, msg_id=None):
         bfrags = []
+        me = MessageEncoder(self.sender_id)
         for x in self.frags:
-            me = MessageEncoder(self.sender_id)
             fragx, _ = me.encode(
                 dest_id=dest_id,
                 image_data=x.data,
