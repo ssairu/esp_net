@@ -107,8 +107,7 @@ class Sender:
         counter = 0
         num_frags = len(devided_image)
         for x in devided_image:
-            if self.testing:
-                print(str(counter + 1) + '/' + str(num_frags))
+            print(f"send_img {img_id}: {counter + 1} / {num_frags}", end="\r")
             counter += 1
 
             x1 = x.replace(b'\x00', b'\x01')
@@ -123,6 +122,7 @@ class Sender:
                 time.sleep(sleep)
 
             self.ser.write(x1[(num - 1) * Sender.crit_size:])
+        print("\n")
 
         return 0
 
@@ -145,8 +145,7 @@ class Sender:
             print(f"cant encode error: {e}")
             return -1
 
-        if self.testing:
-            print(f"send message {msg_id}")
+        print(f"send message {msg_id}")
 
         num = len(mes) // Sender.crit_size + (0 if len(mes) % Sender.crit_size == 0 else 1)
 

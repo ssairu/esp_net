@@ -139,7 +139,9 @@ class ImageBuilder:
 
         ipos = self.get_img_pos(frag)
         self.images[ipos].add_frag(frag)
-        print(str(frag.id) + " / " + str(self.images[ipos].num_frags) + "total(" + str(len(self.images[ipos].frags)) + ")")
+        print(str(frag.id+1) + " / " + str(self.images[ipos].num_frags) + "total(" + str(len(self.images[ipos].frags)) + ")", end="\r")
+        if frag.id + 1 == self.images[ipos].num_frags:
+            print("\n")
 
     def get_img_by_frag(self, frag):
         ipos = self.get_img_pos(frag)

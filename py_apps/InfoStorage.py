@@ -90,6 +90,8 @@ class InfoStorage:
                      parsed_message_dict["image_height"],
                      3)
                 )
+        else:
+            print(f"(get_info_msg) sender_id: {mes.sender_id}, msg_id: {mes.msg_id}, time: {mes.save_time}")
 
         if save_db or self.save_db:
             try:
@@ -99,7 +101,6 @@ class InfoStorage:
 
         with self.info_lock:
             self.info_dict[global_id] = mes
-
 
     def get_image(self, sender_id, image_num):
         with self.lock:
@@ -133,11 +134,12 @@ class InfoStorage:
             filepath = os.path.join(self.directory, filename)
 
             cv2.imwrite(filepath, res)
-            self.db.update_image_after_save(
-                sender_id=img.sender_id,
-                image_num=img.img_id,
-                file_path=filepath
-            )
+            if save_db or self.save_db:
+                self.db.update_image_after_save(
+                    sender_id=img.sender_id,
+                    image_num=img.img_id,
+                    file_path=filepath
+                )
             print(f"Изображение сохранено: {filepath}")
             return True
 

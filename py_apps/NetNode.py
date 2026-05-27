@@ -6,6 +6,7 @@ import serial
 import threading
 import time
 import numpy as np
+import sys
 
 
 class NetNode:
@@ -63,7 +64,7 @@ class NetNode:
 
     def get_commands(self):
         while True:
-            command = str(input())
+            command = sys.stdin.readline().strip()
             command, params = command.split("+")[0], command.split("+")[1:] if len(command.split("+")) > 1 else []
             params = {x.split(":")[0]: x.split(":")[1] for x in params}
             print(f"\nget command: '{command}' with params {params}\n")
@@ -96,6 +97,7 @@ class NetNode:
                     print(f"не найден параметр {p}")
                     return
             func(**valid_params)
+            print(f"good end {command}")
 
     def do_commands(self):
         while True:

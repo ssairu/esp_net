@@ -60,7 +60,7 @@ class MessageEncoder:
 
         # 1. bools
         if bools and len(bools) > 0:
-            size_c = max(1, (len(bools) + 5) // 8)
+            size_c = max(2, (len(bools) + 5) // 8)
             bool_converter = Converter(size=size_c)  # минимум 2 байта + запас
             bools_bytes = bool_converter.bools_to_bytes(bools)
             len_bools = self.c_main.int_to_bytes(len(bools))

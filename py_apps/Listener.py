@@ -121,21 +121,9 @@ class Listener:
             ending = self.ser.read(3)
 
             end_aim = b'%@%'
-            if testing:
-                if ending == end_aim:
-                    print('RIGHT, GET ALL')
-                else:
-                    print('WRONG, WITHOUT ENDING')
-                    print("id_fragment: " + str(result["fragment_id"]))
-                    print("id_img: " + str(result["image_num"]))
-                    print("num_fragments: " + str(result["image_total_fragments"]))
-                    print("len(response): " + str(len(result["image"])))
-                    print(b'ending: ' + ending)
-                    if b'%@%' in end_aim:
-                        print('consist "%@%": YES')
-                    else:
-                        print('consist "%@%": NO')
-                    return
+            if not ending == end_aim:
+                print('wrong not ending')
+                return
 
             return result
         return
