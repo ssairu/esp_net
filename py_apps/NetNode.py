@@ -7,15 +7,18 @@ import threading
 import time
 import numpy as np
 import sys
+import copy
 
 
 class NetNode:
     def __init__(self, node_id, testing=False):
         self.testing = testing
         self.node_id = node_id
+        self.request_dict = {}
         self.port = None
         self.ser = None
         self.lock = threading.Lock()
+        self.request_lock = threading.Lock()
         self.listener = None
         self.sender = None
         self.thread_do_commands = None
@@ -56,11 +59,16 @@ class NetNode:
         self.thread_get_messages.join()
         print('\n\n reading stopped \n\n')
 
-    def send_image(self, path, dest_id=0, msg_id=None, speed=None, max_frag_size=None):
-        return self.sender.send_image_file(path, dest_id, msg_id, speed, max_frag_size)
+    def send_image(self, path, dest_id=0, msg_id=None, speed=None, max_frag_size=None, frags_mask=None):
+        return self.sender.send_image_file(path, dest_id, msg_id, speed, max_frag_size, frags_mask)
 
-    def send_info(self, text=None, bools=None, json=None, dest_id=0, msg_id=None, cor_id=0, speed=None, is_request=False):
-        return self.sender.send_info(text, bools, json, dest_id, msg_id, cor_id, speed, is_request)
+    def send_info(self, text=None, bools=None, json=None, dest_id=0, msg_id=None, cor_id=0, speed=None, is_request=False, max_attempts=1, retry_time=10):
+        msg_id = self.sender.send_info(text, bools, json, dest_id, msg_id, cor_id, speed, is_request)
+        msg_info = ((text, bools, json, dest_id, msg_id, cor_id, speed, is_request), max_attempts, retry_time)
+        if is_request:
+            with self.request_lock:
+                self.request_dict[msg_id] = time.time(), 1, msg_info
+        return msg_id
 
     def get_commands(self):
         while True:
@@ -100,8 +108,30 @@ class NetNode:
             print(f"good end {command}")
 
     def do_commands(self):
+        index = -1
         while True:
             time.sleep(0.5)
+            for m_id, (last_time, made_attempts, (msg_info, max_attempts, retry_time)) in copy.deepcopy(self.request_dict).items():
+                with self.request_lock:
+                    if last_time + retry_time < time.time() and made_attempts < max_attempts:
+                        print("retry: ", end="")
+                        msg_id = self.sender.send_info(*msg_info)
+                        self.request_dict[msg_id] = time.time(), made_attempts+1, (msg_info, max_attempts, retry_time)
+                    elif last_time + retry_time < time.time() and made_attempts >= max_attempts:
+                        if m_id in self.request_dict:
+                            del self.request_dict[m_id]
+                            print(f"ERROR: Can't reach any request answer for msg_id: {m_id}; attempts: {made_attempts}")
+                    if m_id in [x.cor_id for x in self.listener.storage.info_dict.values()]:
+                        if m_id in self.request_dict:
+                            del self.request_dict[m_id]
+                            print(f"get ok for msg_id: {m_id}")
+
+            for i, x in enumerate(self.listener.storage.info_dict.values()):
+                if i > index and x.is_request:
+                    print(f"send ok for msg_id: {x.msg_id}")
+                    self.sender.send_info(dest_id=x.sender_id, cor_id=x.msg_id)
+                    index = i
+
             with self.lock:
                 if len(self.commands) == 0:
                     continue

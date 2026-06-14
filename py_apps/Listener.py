@@ -10,7 +10,7 @@ from .InfoStorage import InfoStorage
 
 
 class Listener:
-    def __init__(self, listener_id, ser, message_callback=None, testing=False):
+    def __init__(self, listener_id, ser, testing=False):
         self.testing = testing
         self.listener_id = listener_id
         self.ser = ser
@@ -146,6 +146,7 @@ class Listener:
             with self.lock:
                 if res_frag["dest_id"] == 0 or res_frag["dest_id"] == self.listener_id:
                     self.storage.save_message(res_frag)
+
 
                 getting = self.GETTING
 

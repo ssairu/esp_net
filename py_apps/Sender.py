@@ -78,7 +78,7 @@ class Sender:
     def set_max_frag_size_default(self, size):
         self.default_max_frag_size = size
 
-    def send_image_file(self, path, dest_id=0, msg_id=None, speed=None, max_frag_size=None) -> int:
+    def send_image_file(self, path, dest_id=0, msg_id=None, speed=None, max_frag_size=None, frags_mask=None) -> int:
         # Load the Image using OpenCV
         img = cv2.imread(path)
         return self.send_frame(
@@ -87,10 +87,11 @@ class Sender:
             msg_id=msg_id,
             path=path,
             speed=speed,
-            max_frag_size=max_frag_size
+            max_frag_size=max_frag_size,
+            frags_mask=frags_mask
         )
 
-    def send_frame(self, img, dest_id=0, msg_id=None, path=None, speed=None, max_frag_size=None) -> int:
+    def send_frame(self, img, dest_id=0, msg_id=None, path=None, speed=None, max_frag_size=None, frags_mask=None) -> int:
         if not speed:
             speed = self.default_speed
         if not max_frag_size:
@@ -104,11 +105,17 @@ class Sender:
 
         image = Image(img.tobytes(), img.shape, self.sender_id, img_id, max_frag_size)
         devided_image = image.tobytesFrags(dest_id=dest_id, msg_id=msg_id)
-        counter = 0
         num_frags = len(devided_image)
-        for x in devided_image:
-            print(f"send_img {img_id}: {counter + 1} / {num_frags}", end="\r")
-            counter += 1
+        if frags_mask:
+            print(f"send_img {img_id}, frags: ")
+        for counter, x in enumerate(devided_image):
+            if frags_mask and counter < len(frags_mask) and not frags_mask[counter]:
+                continue
+
+            if frags_mask:
+                print(f"{counter + 1}", end=", ")
+            else:
+                print(f"send_img {img_id}: {counter + 1} / {num_frags}", end="\r")
 
             x1 = x.replace(b'\x00', b'\x01')
             if len(x1) % Sender.crit_size == 0:

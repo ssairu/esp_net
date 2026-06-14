@@ -131,7 +131,7 @@ class ImageBuilder:
         return res
 
     def add_frag(self, frag, num_fragments, img_shape):
-        if not self.img_in_load(frag):
+        if not self.img_in_load(frag) and not self.img_is_ready(frag):
             self.images += [Imgforbuilder(frag.sender_id, frag.img_id, num_fragments, img_shape)]
             print("add Image " + str(frag.img_id) + "to builder")
             print("Frag added " + str(frag.id) + "\nfrags:")

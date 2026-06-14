@@ -43,7 +43,6 @@ class InfoStorage:
         self.db = NetDatabase(db_name)
         self.save_db = True
 
-
     def save_message(self, parsed_message_dict, save_db=False):
         mes = Message(
             parsed_message_dict["sender_id"],
@@ -58,6 +57,9 @@ class InfoStorage:
             parsed_message_dict["fragment_id"],
             datetime.now(),
         )
+
+        if (mes.sender_id, mes.msg_id) in self.info_dict:
+            return
 
         image_id = None
 
